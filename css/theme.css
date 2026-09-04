@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;1,8..60,400&display=swap');
+
 :root {
   --bg: #F7F7F5;
   --text: #1B1E22;
@@ -6,14 +8,27 @@
   --muted: #74777A;
   --border: #DDDCD8;
   --hover: #1E3449;
+
+  /* Override the reference stylesheet's old red/paper variables. */
+  --accent: #243B53;
+  --paper-line: #DDDCD8;
+  --paper-soft: #F7F7F5;
 }
 
-/* Color system only. Typography, sizing, spacing, and layout remain controlled
-   by the existing Tufte/site stylesheets. */
 html,
 body {
-  background: var(--bg);
-  color: var(--text);
+  background: var(--bg) !important;
+  color: var(--text) !important;
+}
+
+/* Match the supplied Stone + Navy reference rather than the larger ET Book rendering. */
+body {
+  font-family: "Source Serif 4", Georgia, serif !important;
+}
+
+article.group {
+  width: 55%;
+  max-width: 800px;
 }
 
 h1,
@@ -22,42 +37,119 @@ h3,
 h4,
 h5,
 h6 {
-  color: var(--text);
+  font-family: "Source Serif 4", Georgia, serif !important;
+  color: var(--text) !important;
+  font-weight: 400;
 }
 
+h1 {
+  font-size: 2.75rem;
+  line-height: 1.15;
+}
+
+h2 {
+  font-size: 2.15rem;
+  line-height: 1.12;
+}
+
+h3 {
+  font-size: 1.65rem;
+  line-height: 1.2;
+}
+
+p,
+ol,
+ul {
+  font-family: "Source Serif 4", Georgia, serif !important;
+  font-size: 1.28rem;
+  line-height: 1.62;
+}
+
+p {
+  color: var(--text) !important;
+  text-align: left;
+}
+
+/* Navigation: black name + navy Projects, as in the reference image. */
+header nav.group,
+nav.group {
+  font-family: "Inter", Arial, sans-serif !important;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+nav.group a,
+nav.group a:visited,
+nav.group a:first-child,
+nav.group a:first-child:visited,
+nav.group a.active,
+nav.group a.active:visited {
+  color: var(--text) !important;
+  text-decoration: none !important;
+  background: none !important;
+  text-shadow: none !important;
+}
+
+nav.group a[href="/projects/"],
+nav.group a[href="/projects/"]:visited,
+nav.group a.active[href="/projects/"],
+nav.group a.active[href="/projects/"]:visited {
+  color: var(--navy) !important;
+}
+
+nav.group a:hover {
+  color: var(--hover) !important;
+}
+
+/* Inline editorial links: explicitly beat Tufte's p>a color:inherit rule. */
 a,
-a:visited {
-  color: var(--link);
-  text-decoration-color: currentColor;
-  text-underline-offset: 2px;
+a:visited,
+p > a:link,
+p > a:visited,
+article a:link,
+article a:visited {
+  color: var(--link) !important;
 }
 
-a:hover {
-  color: var(--hover);
+p > a:link,
+p > a:visited,
+article p > a:link,
+article p > a:visited {
+  background: none !important;
+  text-shadow: none !important;
+  text-decoration: underline !important;
+  text-decoration-thickness: 1px !important;
+  text-underline-offset: 2px !important;
 }
 
-/* Keep the name neutral; use navy for Projects / navigation emphasis. */
-nav a,
-nav a:visited {
-  color: var(--text);
+a:hover,
+p > a:hover,
+article a:hover {
+  color: var(--hover) !important;
 }
 
-nav a[href="/projects/"],
-nav a[href="/projects/"]:visited,
-nav a.active[href="/projects/"],
-nav a.active[href="/projects/"]:visited {
-  color: var(--navy);
+/* Research/project listing stays editorial: dark titles, muted metadata, stone dividers. */
+ul.content-listing h2,
+ul.content-listing > li > a,
+ul.content-listing > li > a:visited,
+ul.content-listing > li > a h2,
+ul.content-listing > li > a:visited h2 {
+  color: var(--text) !important;
+  text-decoration: none !important;
 }
 
-nav a.active[href="/"],
-nav a.active[href="/"]:visited {
-  color: var(--text);
+ul.content-listing h2 {
+  font-size: 1.7rem;
+  line-height: 1.15;
 }
 
-nav a:hover {
-  color: var(--hover);
+ul.content-listing > li > a:hover h2 {
+  color: var(--hover) !important;
 }
 
+ul.content-listing .post-meta,
 .post-meta,
 .project-meta,
 .subtitle,
@@ -66,25 +158,31 @@ nav a:hover {
   color: var(--muted) !important;
 }
 
+ul.content-listing .post-meta {
+  font-family: "Source Serif 4", Georgia, serif !important;
+  font-size: 1.08rem;
+  font-style: italic;
+}
+
+ul.content-listing .post-summary,
 .post-summary {
   color: var(--text) !important;
 }
 
-/* Linked post/project titles remain dark editorial headings. */
-.content-listing h2,
-.content-listing a h2,
-.content-listing a:visited h2 {
-  color: var(--text);
-}
-
-.content-listing a:hover h2 {
-  color: var(--hover);
-}
-
-hr,
+hr.invisible,
 hr.slender,
-.content-listing li {
+hr {
   border-color: var(--border) !important;
+}
+
+footer .credits,
+footer .credits a {
+  font-family: "Inter", Arial, sans-serif !important;
+}
+
+footer .credits a,
+footer .credits a:visited {
+  color: var(--link) !important;
 }
 
 .note-box {
@@ -98,4 +196,11 @@ hr.slender,
 .project-table th,
 .project-table td {
   border-color: var(--border) !important;
+}
+
+@media screen and (max-width: 760px) {
+  article.group {
+    width: 90%;
+    max-width: none;
+  }
 }
