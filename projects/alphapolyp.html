@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AlphaPolyp — Mayssa Hajj Hassan</title>
+    <meta name="description" content="AlphaPolyp: colorectal polyp segmentation and single-frame 3D morphology estimation." />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Moe-Zbeeb/Moe-Zbeeb.github.io@main/css/tufte.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Moe-Zbeeb/Moe-Zbeeb.github.io@main/css/site.css" />
+    <link rel="stylesheet" href="/css/project.css" />
+    <link rel="canonical" href="https://mayssahh.github.io/projects/alphapolyp.html" />
+  </head>
+
+  <body>
+    <header>
+      <nav class="group">
+        <a href="/">Mayssa Hajj Hassan</a>
+        <a href="/about/">About</a>
+      </nav>
+    </header>
+
+    <article class="group">
+      <h1>AlphaPolyp</h1>
+      <p class="subtitle">Estimating colorectal polyp segmentation, physical dimensions, and volume from a single colonoscopy image.</p>
+      <p class="project-meta">Research project at the American University of Beirut · Medical AI / Computer Vision</p>
+      <p class="project-contribution"><strong>My contribution:</strong> model architecture, training strategy, and evaluation.</p>
+
+      <figure class="project-figure wide">
+        <img src="https://raw.githubusercontent.com/LineIntegralx/AlphaPolyp/main/images/front.png" alt="AlphaPolyp project overview" />
+        <figcaption>AlphaPolyp project overview.</figcaption>
+      </figure>
+
+      <h2 class="project-section">Motivation</h2>
+      <p>
+        During colonoscopy, identifying a polyp is only part of the problem. Its physical size and morphology influence
+        clinical decisions, including how the lesion is removed and which instruments are used. AlphaPolyp explores whether
+        a computer-vision model can go beyond segmentation and infer a polyp's 3D morphology directly from a single
+        colonoscopy frame: its volume and three orthogonal dimensions, x, y, and z.
+      </p>
+      <p>
+        One motivation behind the project was the possibility of providing quantitative sizing information directly during
+        colonoscopy and potentially reducing reliance on additional imaging when precise lesion sizing is required. We did
+        not validate that clinical hypothesis in this project; doing so would require real clinical cases with paired
+        colonoscopy images and an independent measurement reference such as CT or another validated sizing method.
+      </p>
+
+      <h2 class="project-section">Core idea</h2>
+      <p>
+        Instead of treating segmentation and morphology estimation as separate tasks, we built a multi-task model that
+        predicts both simultaneously. Given a single colonoscopy frame, AlphaPolyp produces a pixel-level segmentation mask,
+        estimated polyp volume in mm³, and estimated physical dimensions x, y, and z in mm.
+      </p>
+      <p>
+        The segmentation prediction is explicitly reused in the regression pathway: a downsampled predicted mask is
+        concatenated with the final encoder representation before global pooling and regression. This allows the morphology
+        estimator to combine deep visual features with information about the predicted polyp region.
+      </p>
+
+      <h2 class="project-section">Dataset and 3D supervision</h2>
+      <p>
+        We used <a href="https://enric1994.github.io/synth-colon/" target="_blank" rel="noopener noreferrer">Synth-Colon</a>,
+        a synthetic colonoscopy dataset that includes rendered frames together with the underlying colon and polyp geometry.
+        Importantly, all images used for training and quantitative evaluation are synthetic.
+      </p>
+      <p>
+        The dataset contains directly rendered synthetic images as well as CycleGAN-enhanced synthetic images. The latter are
+        still synthetic scenes, but their appearance is translated toward a more realistic colonoscopy style using CycleGAN.
+        They should therefore be understood as realism-enhanced synthetic data, not as real clinical images.
+      </p>
+      <p>
+        After cleaning and matching annotations, the final project documentation reports 18,378 usable images, each paired
+        with a segmentation mask and four regression targets: volume and x/y/z dimensions.
+      </p>
+
+      <h3>Generating morphology labels</h3>
+      <p>
+        The regression labels were derived from the original 3D meshes. A Blender pipeline imports the colon and polyp
+        geometry, computes the boolean intersection corresponding to the part of the polyp inside the colon, calculates the
+        resulting 3D volume, extracts its world-space bounding box, and converts the measurements into mm and mm³.
+      </p>
+      <p>
+        This gave the regression task physically grounded targets derived from the 3D scene rather than estimates inferred
+        from the 2D mask alone.
+      </p>
+
+      <div class="figure-grid">
+        <figure>
+          <img src="https://raw.githubusercontent.com/LineIntegralx/AlphaPolyp/main/data/sample_data/images/00000000.png" alt="Synthetic Synth-Colon sample" />
+          <figcaption>Synthetic rendered sample from Synth-Colon.</figcaption>
+        </figure>
+        <figure>
+          <img src="https://raw.githubusercontent.com/LineIntegralx/AlphaPolyp/main/data/sample_data/cyclegan_images/00000000.png" alt="CycleGAN-enhanced synthetic sample" />
+          <figcaption>CycleGAN-enhanced version of a synthetic sample.</figcaption>
+        </figure>
+      </div>
+
+      <h2 class="project-section">Model architecture</h2>
+      <p>
+        AlphaPolyp extends a RAPUNet-style encoder-decoder with a regression branch for 3D morphology estimation. The feature
+        backbone is an ImageNet-pretrained CAFormer-S18. Multi-scale CAFormer representations are injected into the RAPUNet
+        encoder, whose RAPU blocks combine residual and atrous-convolution pathways. The decoder aggregates features across
+        resolutions and produces the segmentation mask.
+      </p>
+      <p>
+        For morphology estimation, the final encoder representation is concatenated with a downsampled segmentation mask and
+        passed through global average pooling followed by a small MLP: Dense 64 → Dense 32 → four outputs corresponding to
+        volume, x, y, and z.
+      </p>
+
+      <figure class="project-figure wide">
+        <img src="https://raw.githubusercontent.com/LineIntegralx/AlphaPolyp/main/images/model_architecture.png" alt="AlphaPolyp architecture" />
+        <figcaption>AlphaPolyp architecture: RAPUNet-style segmentation with a regression head for volume and x/y/z morphology prediction.</figcaption>
+      </figure>
+
+      <h2 class="project-section">Training</h2>
+      <p>
+        Training followed a staged strategy. We first optimized the regression component while keeping the segmentation
+        network fixed, then unfroze the full architecture and jointly fine-tuned segmentation and morphology prediction. The
+        final documented setup used AdamW, Dice loss for segmentation, MSE for regression, and equal weighting between the two
+        objectives, with geometric and photometric augmentation.
+      </p>
+      <p>
+        My work focused primarily on adapting the architecture for joint morphology prediction, iterating on the training
+        strategy, and evaluating the resulting system.
+      </p>
+
+      <h2 class="project-section">Evaluation</h2>
+      <p>
+        We evaluated segmentation and morphology prediction on held-out synthetic and CycleGAN-enhanced synthetic samples.
+        The results show strong segmentation performance within the synthetic domain, while accurate physical morphology
+        recovery from a single frame remains the harder problem.
+      </p>
+
+      <div class="project-table">
+        <table class="booktabs">
+          <thead>
+            <tr><th>Metric</th><th>CycleGAN-enhanced synthetic</th><th>Synthetic</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Dice ↑</td><td>0.976</td><td>0.981</td></tr>
+            <tr><td>Precision ↑</td><td>0.965</td><td>0.970</td></tr>
+            <tr><td>Recall ↑</td><td>0.963</td><td>0.963</td></tr>
+            <tr><td>Volume RMSE ↓</td><td>39.10 mm³</td><td>37.25 mm³</td></tr>
+            <tr><td>Predictions within 10% error ↑</td><td>65.7%</td><td>72.9%</td></tr>
+            <tr><td>Precision within ±5 mm ↑</td><td>0.782</td><td>0.812</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 class="project-section">Clinical sanity check</h2>
+      <p>
+        Synthetic evaluation alone does not establish real-world measurement accuracy. To obtain an exploratory clinical
+        sanity check, we ran the model on 11 real colonoscopy images not used in training or synthetic validation and asked
+        <a href="https://www.aub.edu.lb/fm/DepartmentOfInternalMedicine/Pages/Gastroenterology.aspx" target="_blank" rel="noopener noreferrer">Dr. Alaa Sharara</a>,
+        Professor of Medicine in Gastroenterology at the American University of Beirut Medical Center, to review the
+        morphology predictions qualitatively.
+      </p>
+
+      <div class="project-table">
+        <table class="booktabs">
+          <thead><tr><th>Assessment</th><th>Cases</th></tr></thead>
+          <tbody>
+            <tr><td>Excellent</td><td>2</td></tr>
+            <tr><td>Fair</td><td>6</td></tr>
+            <tr><td>Poor</td><td>3</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="note-box">
+        <p>
+          This was a clinical plausibility check, not a quantitative real-world validation. Ground-truth 3D measurements were
+          unavailable for these cases, so the exercise could not establish measurement accuracy on real patients.
+        </p>
+      </div>
+
+      <h2 class="project-section">Qualitative examples</h2>
+      <div class="figure-grid">
+        <figure>
+          <img src="https://raw.githubusercontent.com/LineIntegralx/AlphaPolyp/main/images/image1.jpeg" alt="AlphaPolyp qualitative prediction 1" />
+          <figcaption>Example prediction · predicted volume 62.09 mm³.</figcaption>
+        </figure>
+        <figure>
+          <img src="https://raw.githubusercontent.com/LineIntegralx/AlphaPolyp/main/images/image2.jpeg" alt="AlphaPolyp qualitative prediction 2" />
+          <figcaption>Example prediction · predicted volume 81.96 mm³.</figcaption>
+        </figure>
+        <figure>
+          <img src="https://raw.githubusercontent.com/LineIntegralx/AlphaPolyp/main/images/image5.jpeg" alt="AlphaPolyp qualitative prediction 5" />
+          <figcaption>Example prediction · predicted volume 126.14 mm³.</figcaption>
+        </figure>
+        <figure>
+          <img src="https://raw.githubusercontent.com/LineIntegralx/AlphaPolyp/main/images/image6.jpeg" alt="AlphaPolyp no-polyp example" />
+          <figcaption>No-polyp case: the interface returns no morphology estimate when no polyp is detected.</figcaption>
+        </figure>
+      </div>
+
+      <h2 class="project-section">Prototype system</h2>
+      <p>
+        We packaged AlphaPolyp as an end-to-end prototype with two Dockerized services: a Flask web application and a separate
+        model API. A user uploads a colonoscopy image, the frontend forwards it to the model service, and the results page
+        displays the segmentation overlay, estimated volume, x/y/z dimensions, and processing time.
+      </p>
+
+      <h2 class="project-section">Limitations</h2>
+      <p><strong>Synthetic supervision.</strong> The main limitation is that the model was trained on synthetic data. CycleGAN enhancement improves appearance realism but does not remove the domain gap to real clinical images.</p>
+      <p><strong>No real-world metric ground truth.</strong> The 11-image clinical review provided a plausibility check only; no paired real 3D ground-truth measurements were available.</p>
+      <p><strong>Unvalidated clinical motivation.</strong> We could not validate whether the system could reduce the need for additional imaging because that would require real clinical scenarios with paired colonoscopy and independent measurement references.</p>
+      <p><strong>Single-view ambiguity.</strong> Estimating 3D size from one monocular image is sensitive to camera distance, perspective, illumination, lesion orientation, and flat or low-contrast morphology.</p>
+      <p><strong>Training constraints.</strong> The project documentation notes that compute limitations restricted exhaustive full-dataset training under all configurations.</p>
+
+      <h2 class="project-section">What I would explore next</h2>
+      <p>
+        The next step I would care most about is moving from synthetic plausibility to calibrated real-world measurement:
+        collecting paired colonoscopy and reliable 3D size references, quantifying domain shift, and testing whether
+        multi-view or temporal information from colonoscopy video can reduce the depth and scale ambiguity of single-frame
+        estimation.
+      </p>
+      <p>
+        Other directions include real-image fine-tuning, domain adaptation, uncertainty estimation, multi-view reconstruction,
+        and prospective clinical validation.
+      </p>
+
+      <h2 class="project-section">Links</h2>
+      <p class="project-links">
+        <a href="https://github.com/LineIntegralx/AlphaPolyp" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://enric1994.github.io/synth-colon/" target="_blank" rel="noopener noreferrer">Synth-Colon dataset</a>
+        <a href="https://github.com/LineIntegralx/AlphaPolyp/blob/main/documentation.md" target="_blank" rel="noopener noreferrer">Technical documentation</a>
+      </p>
+    </article>
+
+    <footer>
+      <hr class="slender" />
+      <div class="credits">
+        <a href="https://github.com/MayssaHH">GitHub</a>
+        <a href="/about/">About</a>
+      </div>
+    </footer>
+  </body>
+</html>
