@@ -1,0 +1,90 @@
+.project-meta {
+  color: #5a5a52;
+  font-style: italic;
+  margin-top: 0.6rem;
+}
+
+.project-contribution {
+  margin-top: 1.1rem;
+}
+
+.project-section {
+  margin-top: 3.5rem;
+}
+
+.project-figure {
+  margin: 2.2rem 0 3rem;
+  width: 100%;
+}
+
+.project-figure.wide {
+  width: 150%;
+  max-width: 88vw;
+}
+
+.project-figure img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.project-figure figcaption,
+.figure-grid figcaption {
+  font-size: 1rem;
+  line-height: 1.45;
+  color: #5a5a52;
+  margin-top: 0.7rem;
+}
+
+.figure-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.4rem;
+  width: 150%;
+  max-width: 88vw;
+  margin: 2.2rem 0 3rem;
+}
+
+.figure-grid figure {
+  margin: 0;
+}
+
+.figure-grid img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.project-table {
+  width: 145%;
+  max-width: 86vw;
+  margin: 2rem 0 3rem;
+}
+
+.project-table table {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.project-links a {
+  margin-right: 1.25rem;
+}
+
+.note-box {
+  border-left: 2px solid #a00000;
+  padding-left: 1.2rem;
+  margin: 1.8rem 0;
+}
+
+@media screen and (max-width: 760px) {
+  .project-figure.wide,
+  .figure-grid,
+  .project-table {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .figure-grid {
+    grid-template-columns: 1fr;
+  }
+}
