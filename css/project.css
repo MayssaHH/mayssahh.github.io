@@ -36,20 +36,8 @@
   margin-top: 0.7rem;
 }
 
-/* Replace the original AlphaPolyp overview graphic with the new Stone + Navy hero. */
-article > figure.project-figure.wide:first-of-type {
-  background-image: url('/images/alphapolyp-hero.jpg');
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  aspect-ratio: 16 / 9;
-}
-
-article > figure.project-figure.wide:first-of-type > img {
-  display: none;
-}
-
-article > figure.project-figure.wide:first-of-type > figcaption {
+/* AlphaPolyp currently has no introductory hero image. */
+article > .project-contribution + figure.project-figure.wide {
   display: none;
 }
 
