@@ -198,9 +198,63 @@ footer .credits a:visited {
   border-color: var(--border) !important;
 }
 
+/* Homepage portrait: widen only the intro, keep Research & Notes on the original reading column. */
+.home-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 3.25rem;
+  align-items: start;
+  width: min(82vw, 1100px);
+}
+
+.home-intro-copy {
+  min-width: 0;
+}
+
+.home-portrait {
+  margin: 1.4rem 0 0;
+  width: 250px;
+}
+
+.home-portrait img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 2px;
+}
+
+.home-notes {
+  width: 100%;
+}
+
+@media screen and (max-width: 980px) {
+  .home-intro {
+    grid-template-columns: minmax(0, 1fr) 210px;
+    gap: 2.25rem;
+    width: min(86vw, 940px);
+  }
+
+  .home-portrait {
+    width: 210px;
+  }
+}
+
 @media screen and (max-width: 760px) {
   article.group {
     width: 90%;
     max-width: none;
+  }
+
+  .home-intro {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 1.2rem;
+  }
+
+  .home-portrait {
+    order: -1;
+    width: 180px;
+    margin: 0 0 0.5rem;
   }
 }
