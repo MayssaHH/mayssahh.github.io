@@ -36,11 +36,6 @@
   margin-top: 0.7rem;
 }
 
-/* AlphaPolyp currently has no introductory hero image. */
-article > .project-contribution + figure.project-figure.wide {
-  display: none;
-}
-
 .figure-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
