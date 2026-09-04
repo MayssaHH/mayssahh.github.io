@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1672" height="941" viewBox="0 0 1672 941">
+<rect width="1672" height="941" fill="#F7F7F5"/>
+<style>
+.t{font-family:Georgia,'Times New Roman',serif; fill:#243B53;}
+.s{font-family:Arial,Helvetica,sans-serif; fill:#74777A;}
+.math{font-family:'Times New Roman',Georgia,serif; font-style:italic; fill:#243B53;}
+</style>
+<rect x="24" y="153" width="320" height="667" rx="14" fill="#F7F7F5" stroke="#DDDCD8" stroke-width="1.5"/>
+<rect x="370" y="153" width="466" height="667" rx="14" fill="#F7F7F5" stroke="#DDDCD8" stroke-width="1.5"/>
+<rect x="860" y="153" width="390" height="667" rx="14" fill="#F7F7F5" stroke="#DDDCD8" stroke-width="1.5"/>
+<rect x="1274" y="153" width="374" height="667" rx="14" fill="#F7F7F5" stroke="#DDDCD8" stroke-width="1.5"/>
+<circle cx="76" cy="205" r="34" fill="#243B53"/><text x="76" y="217" text-anchor="middle" class="t" font-size="34" fill="#fff" style="fill:#fff">1</text>
+<text x="132" y="218" class="t" font-size="36">Input pair</text>
+<text x="50" y="274" font-family="Georgia, serif" font-size="23" fill="#74777A" font-weight="400">Two samples</text>
+<text x="50" y="303" font-family="Georgia, serif" font-size="23" fill="#74777A" font-weight="400">represented by feature</text>
+<text x="50" y="332" font-family="Georgia, serif" font-size="23" fill="#74777A" font-weight="400">vectors.</text>
+<rect x="48" y="333" width="272" height="114" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<text x="184" y="382" text-anchor="middle" class="math" font-size="32">x = (x₁, …, xₚ)</text><text x="184" y="428" text-anchor="middle" class="math" font-size="32">z = (z₁, …, zₚ)</text>
+<line x1="50" y1="473" x2="318" y2="473" stroke="#DDDCD8" stroke-width="2"/>
+<text x="50" y="513" class="t" font-size="27">Decompose by feature:</text>
+<text x="115" y="555" class="math" font-size="30">x₁</text><text x="180" y="555" class="t" font-size="28">↔</text><text x="235" y="555" class="math" font-size="30">z₁</text>
+<text x="115" y="595" class="math" font-size="30">x₂</text><text x="180" y="595" class="t" font-size="28">↔</text><text x="235" y="595" class="math" font-size="30">z₂</text>
+<text x="185" y="633" text-anchor="middle" class="math" font-size="30">⋮</text>
+<text x="115" y="675" class="math" font-size="30">xₖ</text><text x="180" y="675" class="t" font-size="28">↔</text><text x="235" y="675" class="math" font-size="30">zₖ</text>
+<text x="185" y="715" text-anchor="middle" class="math" font-size="30">⋮</text>
+<text x="115" y="755" class="math" font-size="30">xₚ</text><text x="180" y="755" class="t" font-size="28">↔</text><text x="235" y="755" class="math" font-size="30">zₚ</text>
+<line x1="344" y1="472" x2="365" y2="472" stroke="#365F7D" stroke-width="2"/><polygon points="365,472 353,465 353,479" fill="#365F7D"/>
+<circle cx="422" cy="205" r="34" fill="#243B53"/><text x="422" y="217" text-anchor="middle" class="t" font-size="34" fill="#fff" style="fill:#fff">2</text>
+<text x="486" y="218" class="t" font-size="34">Per-feature triple kernel</text>
+<text x="396" y="274" font-family="Georgia, serif" font-size="24" fill="#74777A" font-weight="400">For each feature k, compute three</text>
+<text x="396" y="308" font-family="Georgia, serif" font-size="24" fill="#74777A" font-weight="400">complementary kernels and learn their</text>
+<text x="396" y="342" font-family="Georgia, serif" font-size="24" fill="#74777A" font-weight="400">mixture.</text>
+<rect x="392" y="441" width="132" height="60" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<text x="458" y="479" text-anchor="middle" class="math" font-size="28">(xₖ, zₖ)</text>
+<line x1="524" y1="470" x2="548" y2="369" stroke="#365F7D" stroke-width="2"/>
+<line x1="524" y1="470" x2="548" y2="465" stroke="#365F7D" stroke-width="2"/>
+<line x1="524" y1="470" x2="548" y2="559" stroke="#365F7D" stroke-width="2"/>
+<rect x="548" y="340" width="286" height="72" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<text x="691" y="366" text-anchor="middle" class="t" font-size="24" font-weight="700">Linear</text><text x="691" y="394" text-anchor="middle" class="math" font-size="20">Kₗᵢₙ(xₖ,zₖ) = xₖzₖ</text>
+<rect x="548" y="436" width="286" height="72" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<text x="691" y="462" text-anchor="middle" class="t" font-size="24" font-weight="700">RBF</text><text x="691" y="490" text-anchor="middle" class="math" font-size="20">Kᵣᵦ𝒻(xₖ,zₖ) = exp(−γₖ‖xₖ−zₖ‖²)</text>
+<rect x="548" y="530" width="286" height="72" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<text x="691" y="556" text-anchor="middle" class="t" font-size="24" font-weight="700">Polynomial</text><text x="691" y="584" text-anchor="middle" class="math" font-size="20">Kₚₒₗᵧ(xₖ,zₖ) = (xₖzₖ+cₖ)ᵈᵏ</text>
+<rect x="392" y="620" width="442" height="88" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<text x="613" y="676" text-anchor="middle" class="math" font-size="33">Kₖ = αₖKₗᵢₙ + βₖKᵣᵦ𝒻 + ζₖKₚₒₗᵧ</text>
+<text x="613" y="758" text-anchor="middle" class="math" font-size="30">αₖ + βₖ + ζₖ = 1</text><text x="613" y="790" text-anchor="middle" class="t" font-size="20">(normalized within each feature)</text>
+<line x1="836" y1="472" x2="855" y2="472" stroke="#365F7D" stroke-width="2"/><polygon points="855,472 843,465 843,479" fill="#365F7D"/>
+<circle cx="912" cy="205" r="34" fill="#243B53"/><text x="912" y="217" text-anchor="middle" class="t" font-size="34" fill="#fff" style="fill:#fff">3</text>
+<text x="972" y="218" class="t" font-size="34">Feature weighting</text>
+<text x="884" y="274" font-family="Georgia, serif" font-size="24" fill="#74777A" font-weight="400">Combine per-feature kernels</text>
+<text x="884" y="308" font-family="Georgia, serif" font-size="24" fill="#74777A" font-weight="400">with learned feature weights.</text>
+<rect x="884" y="340" width="118" height="56" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<text x="943" y="378" text-anchor="middle" class="math" font-size="31">K₁</text><text x="1045" y="375" text-anchor="middle" class="math" font-size="30">δ₁</text>
+<line x1="1002" y1="368" x2="1094" y2="470" stroke="#365F7D" stroke-width="2"/>
+<rect x="884" y="430" width="118" height="56" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<text x="943" y="468" text-anchor="middle" class="math" font-size="31">K₂</text><text x="1045" y="465" text-anchor="middle" class="math" font-size="30">δ₂</text>
+<line x1="1002" y1="458" x2="1094" y2="470" stroke="#365F7D" stroke-width="2"/>
+<text x="942" y="510" class="t" font-size="34">⋮</text><text x="1044" y="510" class="t" font-size="34">⋮</text>
+<rect x="884" y="545" width="118" height="56" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<text x="943" y="583" text-anchor="middle" class="math" font-size="31">Kₚ</text><text x="1045" y="580" text-anchor="middle" class="math" font-size="30">δₚ</text>
+<line x1="1002" y1="573" x2="1094" y2="500" stroke="#365F7D" stroke-width="2"/>
+<circle cx="1137" cy="485" r="44" fill="#FAFAF8" stroke="#243B53" stroke-width="2"/><text x="1137" y="500" text-anchor="middle" class="t" font-size="52">Σ</text>
+<rect x="884" y="609" width="340" height="98" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<text x="1054" y="666" text-anchor="middle" class="math" font-size="28">K(x,z) = Σₖ δₖ Kₖ(xₖ,zₖ)</text>
+<text x="1054" y="754" text-anchor="middle" class="math" font-size="28">Σₖ δₖ = 1</text><text x="1054" y="785" text-anchor="middle" class="t" font-size="20">(normalized across features)</text>
+<line x1="1252" y1="472" x2="1269" y2="472" stroke="#365F7D" stroke-width="2"/><polygon points="1269,472 1257,465 1257,479" fill="#365F7D"/>
+<circle cx="1326" cy="205" r="34" fill="#243B53"/><text x="1326" y="217" text-anchor="middle" class="t" font-size="34" fill="#fff" style="fill:#fff">4</text>
+<text x="1385" y="218" class="t" font-size="34">Why it matters</text>
+<text x="1300" y="274" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">FATK jointly learns feature</text>
+<text x="1300" y="298" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">relevance and kernel</text>
+<text x="1300" y="322" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">selection, leading to a more</text>
+<text x="1300" y="346" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">flexible and interpretable</text>
+<text x="1300" y="370" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">similarity measure.</text>
+<rect x="1294" y="405" width="330" height="108" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<circle cx="1348" cy="464" r="34" fill="#E4EBF0"/><text x="1348" y="475" text-anchor="middle" class="t" font-size="32">▥</text>
+<text x="1400" y="442" class="t" font-size="24" font-weight="700">Feature selection</text>
+<text x="1400" y="473" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">δₖ highlights</text>
+<text x="1400" y="495" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">informative</text>
+<text x="1400" y="517" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">features.</text>
+<rect x="1294" y="529" width="330" height="108" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<circle cx="1348" cy="588" r="34" fill="#E4EBF0"/><text x="1348" y="599" text-anchor="middle" class="t" font-size="32">⚙</text>
+<text x="1400" y="566" class="t" font-size="24" font-weight="700">Kernel preference</text>
+<text x="1400" y="597" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">each feature chooses</text>
+<text x="1400" y="619" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">the best kernel</text>
+<text x="1400" y="641" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">blend (αₖ, βₖ, ζₖ).</text>
+<rect x="1294" y="653" width="330" height="108" rx="10" fill="#FAFAF8" stroke="#DDDCD8" stroke-width="1.5"/>
+<circle cx="1348" cy="712" r="34" fill="#E4EBF0"/><text x="1348" y="723" text-anchor="middle" class="t" font-size="32">≡</text>
+<text x="1400" y="690" class="t" font-size="24" font-weight="700">Adaptive parameters</text>
+<text x="1400" y="721" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">sub-kernel</text>
+<text x="1400" y="743" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">parameters</text>
+<text x="1400" y="765" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">(γₖ,cₖ,dₖ) adapt</text>
+<text x="1400" y="787" font-family="Georgia, serif" font-size="18" fill="#74777A" font-weight="400">locally per feature.</text>
+</svg>
