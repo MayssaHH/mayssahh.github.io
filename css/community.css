@@ -1,0 +1,130 @@
+/* Community page layout — Stone + Navy, aligned with the rest of the site. */
+
+article.community-page {
+  width: min(82vw, 1100px) !important;
+  max-width: 1100px !important;
+}
+
+.community-intro {
+  width: 760px;
+  max-width: 100%;
+}
+
+.community-list {
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
+  width: 100%;
+}
+
+.community-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  column-gap: 3rem;
+  align-items: start;
+}
+
+.community-copy {
+  min-width: 0;
+}
+
+.community-copy h2 {
+  margin: 0.4rem 0 0.4rem;
+  font-size: 1.7rem;
+  line-height: 1.15;
+}
+
+.community-copy .post-meta {
+  margin: 0 0 0.4rem;
+}
+
+.community-copy .post-summary {
+  margin-top: 0.4rem;
+}
+
+.community-photo {
+  float: none !important;
+  width: 280px !important;
+  max-width: none !important;
+  margin: 0.35rem 0 0 !important;
+}
+
+.community-photo img {
+  display: block;
+  width: 280px;
+  height: auto;
+  max-width: none !important;
+}
+
+.community-photo figcaption {
+  float: none !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0.55rem 0 0 !important;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  text-align: left;
+}
+
+.community-photo--book img {
+  max-height: 300px;
+  width: auto;
+  max-width: 240px !important;
+  margin-left: 0;
+}
+
+.ai-journey-images {
+  display: grid;
+  grid-template-columns: 1fr 0.72fr;
+  gap: 0.65rem;
+  width: 280px;
+  align-items: start;
+}
+
+.ai-journey-images img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+@media screen and (max-width: 900px) {
+  article.community-page {
+    width: 86vw !important;
+  }
+
+  .community-entry {
+    grid-template-columns: minmax(0, 1fr) 230px;
+    column-gap: 2rem;
+  }
+
+  .community-photo,
+  .community-photo img,
+  .ai-journey-images {
+    width: 230px !important;
+  }
+}
+
+@media screen and (max-width: 760px) {
+  article.community-page {
+    width: 90% !important;
+    max-width: none !important;
+  }
+
+  .community-entry {
+    grid-template-columns: 1fr;
+    row-gap: 1rem;
+  }
+
+  .community-photo,
+  .community-photo img,
+  .ai-journey-images {
+    width: min(100%, 320px) !important;
+    max-width: 320px !important;
+  }
+
+  .community-photo--book img {
+    width: auto !important;
+    max-width: 220px !important;
+  }
+}
