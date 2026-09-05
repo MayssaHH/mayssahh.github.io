@@ -32,8 +32,8 @@
       </p>
 
       <figure class="project-figure">
-        <img src="/images/unsafe_fig1_direction.webp" alt="Canonical unsafe direction in activation space" />
-        <figcaption>A model-specific unsafe direction is defined as the difference between the mean unsafe and safe activations at a given layer.</figcaption>
+        <img src="/images/Safe%20and%20Unsafe%20Activation%20Vectors%20%20.png" alt="Safe and unsafe activation vectors in a shared activation space" />
+        <figcaption>Conceptually, the unsafe direction is the displacement from the safe activation mean toward the unsafe activation mean.</figcaption>
       </figure>
 
       <h2 class="project-section">1. Native safety directions</h2>
@@ -59,6 +59,11 @@
         Importantly, safety-labeled data is not used to learn these alignment matrices. Safety labels are introduced only later when extracting and evaluating safety directions.
       </p>
 
+      <figure class="project-figure wide">
+        <img src="/images/Scientific%20Multi-Panel%20Contour%20and%20Scatter%20Figure.png" alt="Cross-model activation alignment visualized in the shared reference spaces" />
+        <figcaption>Alignment experiment. Benign hidden-state activations from different models are projected into their reference spaces; the overlapping distributions provide a sanity check that the learned linear maps preserve comparable activation structure before safety directions are compared.</figcaption>
+      </figure>
+
       <h2 class="project-section">3. Extracting a universal safety vector</h2>
       <p>
         After mapping each model's native unsafe direction into the corresponding reference space, I stack the aligned directions and apply SVD. The dominant component provides a single shared axis for each model group, which I refer to as the universal safety vector.
@@ -66,6 +71,11 @@
       <p>
         The mapped directions show consistently positive cosine similarity with the shared axis, with average alignment to the universal vector of roughly 0.72. This suggests that, after alignment, much of the safety-related variation across models can be summarized by a common low-dimensional direction.
       </p>
+
+      <figure class="project-figure wide">
+        <img src="/images/Cosine%20Similarity%20Heatmaps.png" alt="Cosine similarity heatmaps between mapped model-specific unsafe directions and the universal direction" />
+        <figcaption>Geometric result. After alignment, the universal direction is strongly aligned with most model-specific unsafe directions in both the small-model and large-model groups.</figcaption>
+      </figure>
 
       <h2 class="project-section">4. Behavioral validation</h2>
       <p>
@@ -112,6 +122,11 @@
       <p>
         I also track projection onto the universal axis during generation. For LLaMA-3-8B-Instruct, the score tends to rise over the course of an unsafe generation while remaining lower and more stable for a safe reasoning prompt. This suggests that the shared direction captures safety-relevant dynamics during decoding, not only static prompt-level differences.
       </p>
+
+      <figure class="project-figure wide">
+        <img src="/images/Safety%20Score%20Trajectories%20Chart.png" alt="Safety score trajectories for safe and unsafe generations" />
+        <figcaption>Generation-time experiment. Projection onto the shared direction increases during the unsafe trajectory, while the safe trajectory remains lower, suggesting the representation carries a dynamic signal during decoding.</figcaption>
+      </figure>
 
       <h2 class="project-section">8. Potential applications</h2>
       <p><strong>Relative model comparison and routing.</strong> Models can be mapped into a shared reference space and ranked by their relative projection on the same safety axis for a given query.</p>
