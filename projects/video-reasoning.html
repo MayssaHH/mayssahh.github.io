@@ -12,140 +12,32 @@
     <link rel="stylesheet" href="/css/theme.css" />
     <link rel="canonical" href="https://mayssahh.github.io/projects/video-reasoning.html" />
   </head>
-
   <body>
-    <header>
-      <nav class="group">
-        <a href="/">Mayssa Hajj Hassan</a>
-        <a class="active" href="/projects/">Projects</a>
-      </nav>
-    </header>
-
+    <header><nav class="group"><a href="/">Mayssa Hajj Hassan</a><a class="active" href="/projects/">Projects</a><a href="/community/">Community</a></nav></header>
     <article class="group">
       <h1>Structured Graph-Based Retrieval for Video Reasoning</h1>
       <p class="subtitle">Turning long-form videos into temporal, discourse-aware multimodal graphs for explainable retrieval and question answering.</p>
       <p class="project-meta">Research project · American University of Beirut · Multimodal Retrieval / Video Understanding / Graph-Based Reasoning</p>
       <p class="project-contribution"><strong>My contribution:</strong> graph design, retrieval, implementation, and development of the multimodal processing pipeline.</p>
       <p><strong>Presented at MenaML 2026 at KAUST, Saudi Arabia.</strong></p>
-
-      <h2 class="project-section">Motivation</h2>
-      <p>
-        Video knowledge is rarely contained in one modality. A useful detail may be spoken, shown as text on a slide, visible in a UI, or only meaningful because of when it appears relative to the rest of the video. Flattening a video into a transcript loses visual evidence; treating frames independently loses narrative and temporal structure.
-      </p>
-      <p>
-        This project asks whether video can instead be represented as <em>structured evidence</em>: a graph that preserves what was said, what was shown, when it happened, and how pieces of information relate to each other.
-      </p>
-
-      <h2 class="project-section">Core idea: transcript first</h2>
-      <p>
-        The central design choice is to build the graph from the transcript first. Timestamped speech segments form the semantic and temporal backbone of the video. Visual information is then aligned to that backbone by time and used to enrich it with captions, OCR, entities, and scene-level information.
-      </p>
-      <p>
-        This gives the system a representation that follows the narrative flow of the video while still incorporating evidence that exists only visually.
-      </p>
-
-      <figure class="project-figure wide">
-        <img src="/images/Transcript-First%20Multimodal%20Retrieval%20Pipeline.png" alt="Transcript-first multimodal retrieval pipeline from video input to evidence-grounded answer" />
-        <figcaption>End-to-end pipeline: video ingestion, timestamped transcription, visual understanding, transcript-first graph construction, hybrid retrieval, k-hop expansion, and evidence-grounded answering.</figcaption>
-      </figure>
-
-      <h2 class="project-section">From video to multimodal graph</h2>
-      <p>
-        A YouTube URL is ingested using <code>yt-dlp</code> and <code>ffmpeg</code>. The system extracts audio, frames, clips, and scene boundaries, then produces timestamped speech segments using Whisper. In parallel, visual clips are analyzed for captions, entities, scene type, and OCR.
-      </p>
-      <p>
-        The graph is then constructed around four main node families:
-      </p>
-      <p><strong>Transcript nodes</strong> represent timestamped spoken segments.</p>
-      <p><strong>Visual nodes</strong> store aligned captions, OCR, scene cues, and frame-level descriptions.</p>
-      <p><strong>Topic nodes</strong> represent higher-level semantic segments and discourse structure.</p>
-      <p><strong>Entity nodes</strong> represent canonical people, places, objects, organizations, and concepts mentioned in the video.</p>
-
-      <h3>Relations</h3>
-      <p>
-        The representation goes beyond adjacency. Transcript segments are connected temporally with <code>TEMPORAL_NEXT</code>; visual evidence is connected through <code>ALIGNED_TO</code>; semantic segments connect to topics through <code>BELONGS_TO_TOPIC</code>; entities are attached with <code>CONTAINS_ENTITY</code>; and discourse relations capture links such as <code>EXPLAINS</code>, <code>EXAMPLE_OF</code>, <code>SUPPORT</code>, <code>COUNTER</code>, <code>CAUSES</code>, <code>STEP_BEFORE</code>, <code>ELABORATES</code>, and <code>DEFINES</code>.
-      </p>
-
-      <figure class="project-figure wide">
-        <img src="/images/Video%20Reasoning%20Knowledge%20Graph.png" alt="Knowledge graph structure for transcript, topic, visual, and entity nodes" />
-        <figcaption>The transcript forms the backbone; topic/discourse structure sits above it, visual evidence is temporally aligned below it, and entities provide additional semantic connections.</figcaption>
-      </figure>
-
-      <h2 class="project-section">Retrieval</h2>
-      <p>
-        Retrieval happens in stages rather than as a single nearest-neighbor lookup. A query first runs through a hybrid retrieval layer that combines semantic similarity with keyword matching. The strongest results become seed evidence nodes, which are then expanded through the graph to retrieve related topics, entities, neighboring transcript segments, and aligned visual evidence.
-      </p>
-      <p>
-        The resulting evidence set is reranked and assembled into context for answer generation. Each supporting item retains its source video and timestamp so the final answer can be traced back to evidence.
-      </p>
-
-      <h3>Why hybrid retrieval?</h3>
-      <p>
-        Embedding search is useful for conceptual matches, but exact names, terms, acronyms, and text visible on screen can be easy to miss. Combining semantic and lexical retrieval protects both kinds of signal.
-      </p>
-
-      <h3>Why k-hop expansion?</h3>
-      <p>
-        The most semantically similar node does not always contain the full answer. Relevant context may live one or two graph edges away: an explanation, supporting example, related topic, aligned slide, or neighboring segment. Expanding around high-confidence seed nodes lets the system retrieve that supporting structure explicitly.
-      </p>
-
-      <figure class="project-figure wide">
-        <img src="/images/Five-Stage%20Video%20Reasoning%20Retrieval%20Pipeline.png" alt="Five-stage retrieval pipeline with hybrid search, seed evidence, k-hop expansion, and evidence-grounded answer" />
-        <figcaption>Retrieval flow from user query to cross-video hybrid search, seed evidence extraction, graph expansion, reranking, and a timestamped answer.</figcaption>
-      </figure>
-
-      <h2 class="project-section">Cross-video search</h2>
-      <p>
-        The same retrieval abstraction extends beyond a single video. Node embeddings are precomputed and cached during ingestion, allowing a query to search across a corpus of processed videos, retrieve evidence from multiple sources, and preserve which video and timestamp each item came from.
-      </p>
-      <p>
-        This turns the system from a single-video QA tool into a searchable multimodal video corpus in which evidence from different videos can be brought together through a shared retrieval interface.
-      </p>
-
-      <h2 class="project-section">Explainable video QA</h2>
-      <p>
-        The output is not only an answer. It includes the evidence used to construct that answer: transcript excerpts, visual evidence, OCR, timestamps, node identifiers, and the relevant neighborhood of the graph. The goal is to make retrieval inspectable rather than treating the reasoning context as an opaque bundle of chunks.
-      </p>
-
-      <h2 class="project-section">Prototype system</h2>
-      <p>
-        The system is implemented as an end-to-end application with a FastAPI backend and a React interface. The UI synchronizes the video, transcript, interactive graph, query, and ranked evidence so that the user can move directly between an answer and the supporting video context.
-      </p>
-      <p>
-        The implementation also uses precomputed embeddings, caching, parallel visual processing, and a lightweight <code>ffmpeg</code>-based ingestion path to reduce query-time and ingestion overhead.
-      </p>
-
-      <figure class="project-figure wide">
-        <img src="/images/Video%20Graph%20Research%20Dashboard.png" alt="Video Graph research dashboard with video player, knowledge graph, transcript, query, and evidence panels" />
-        <figcaption>Prototype interface combining the video, graph, transcript, query, and ranked supporting evidence in one workspace.</figcaption>
-      </figure>
-
-      <h2 class="project-section">Evaluation framework</h2>
-      <p>
-        At the current stage, the project defines an evaluation framework rather than reporting a complete quantitative benchmark. Retrieval quality can be measured using Recall@5/10, MRR, nDCG@k, timestamp overlap, and evidence redundancy. Answer quality can be evaluated through human-rated correctness and faithfulness, citation precision, and temporal error. Efficiency can be measured through index-build time, p50/p90 query latency, and memory footprint.
-      </p>
-
-      <h2 class="project-section">Limitations and future directions</h2>
-      <p><strong>Discourse grounding.</strong> Discourse relations are currently inferred and could be strengthened with more explicit structural constraints.</p>
-      <p><strong>Cross-video linking.</strong> Retrieval already spans multiple videos, but richer explicit links based on shared entities and aligned topics would make the corpus graph more coherent.</p>
-      <p><strong>Benchmarking.</strong> The next important step is systematic evaluation on established VideoQA benchmarks together with human evaluation of evidence faithfulness.</p>
-      <p><strong>Interactive refinement.</strong> User-driven graph corrections and active-learning loops could make the representation progressively more reliable.</p>
-
-      <h2 class="project-section">Links</h2>
-      <p class="project-links">
-        <a href="https://github.com/MayssaHH/Graphcast" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="https://drive.google.com/file/d/1jKjik4BT2mnSc-bRyVsq_zeU017thuoe/view?usp=sharing" target="_blank" rel="noopener noreferrer">Demo</a>
-      </p>
+      <h2 class="project-section">Motivation</h2><p>Video knowledge is rarely contained in one modality. A useful detail may be spoken, shown as text on a slide, visible in a UI, or only meaningful because of when it appears relative to the rest of the video. Flattening a video into a transcript loses visual evidence; treating frames independently loses narrative and temporal structure.</p><p>This project asks whether video can instead be represented as <em>structured evidence</em>: a graph that preserves what was said, what was shown, when it happened, and how pieces of information relate to each other.</p>
+      <h2 class="project-section">Core idea: transcript first</h2><p>The central design choice is to build the graph from the transcript first. Timestamped speech segments form the semantic and temporal backbone of the video. Visual information is then aligned to that backbone by time and used to enrich it with captions, OCR, entities, and scene-level information.</p><p>This gives the system a representation that follows the narrative flow of the video while still incorporating evidence that exists only visually.</p>
+      <figure class="project-figure wide"><img src="/images/Transcript-First%20Multimodal%20Retrieval%20Pipeline.png" alt="Transcript-first multimodal retrieval pipeline from video input to evidence-grounded answer" /><figcaption>End-to-end pipeline: video ingestion, timestamped transcription, visual understanding, transcript-first graph construction, hybrid retrieval, k-hop expansion, and evidence-grounded answering.</figcaption></figure>
+      <h2 class="project-section">From video to multimodal graph</h2><p>A YouTube URL is ingested using <code>yt-dlp</code> and <code>ffmpeg</code>. The system extracts audio, frames, clips, and scene boundaries, then produces timestamped speech segments using Whisper. In parallel, visual clips are analyzed for captions, entities, scene type, and OCR.</p><p>The graph is then constructed around four main node families:</p><p><strong>Transcript nodes</strong> represent timestamped spoken segments.</p><p><strong>Visual nodes</strong> store aligned captions, OCR, scene cues, and frame-level descriptions.</p><p><strong>Topic nodes</strong> represent higher-level semantic segments and discourse structure.</p><p><strong>Entity nodes</strong> represent canonical people, places, objects, organizations, and concepts mentioned in the video.</p>
+      <h3>Relations</h3><p>The representation goes beyond adjacency. Transcript segments are connected temporally with <code>TEMPORAL_NEXT</code>; visual evidence is connected through <code>ALIGNED_TO</code>; semantic segments connect to topics through <code>BELONGS_TO_TOPIC</code>; entities are attached with <code>CONTAINS_ENTITY</code>; and discourse relations capture links such as <code>EXPLAINS</code>, <code>EXAMPLE_OF</code>, <code>SUPPORT</code>, <code>COUNTER</code>, <code>CAUSES</code>, <code>STEP_BEFORE</code>, <code>ELABORATES</code>, and <code>DEFINES</code>.</p>
+      <figure class="project-figure wide"><img src="/images/Video%20Reasoning%20Knowledge%20Graph.png" alt="Knowledge graph structure for transcript, topic, visual, and entity nodes" /><figcaption>The transcript forms the backbone; topic/discourse structure sits above it, visual evidence is temporally aligned below it, and entities provide additional semantic connections.</figcaption></figure>
+      <h2 class="project-section">Retrieval</h2><p>Retrieval happens in stages rather than as a single nearest-neighbor lookup. A query first runs through a hybrid retrieval layer that combines semantic similarity with keyword matching. The strongest results become seed evidence nodes, which are then expanded through the graph to retrieve related topics, entities, neighboring transcript segments, and aligned visual evidence.</p><p>The resulting evidence set is reranked and assembled into context for answer generation. Each supporting item retains its source video and timestamp so the final answer can be traced back to evidence.</p>
+      <h3>Why hybrid retrieval?</h3><p>Embedding search is useful for conceptual matches, but exact names, terms, acronyms, and text visible on screen can be easy to miss. Combining semantic and lexical retrieval protects both kinds of signal.</p>
+      <h3>Why k-hop expansion?</h3><p>The most semantically similar node does not always contain the full answer. Relevant context may live one or two graph edges away: an explanation, supporting example, related topic, aligned slide, or neighboring segment. Expanding around high-confidence seed nodes lets the system retrieve that supporting structure explicitly.</p>
+      <figure class="project-figure wide"><img src="/images/Five-Stage%20Video%20Reasoning%20Retrieval%20Pipeline.png" alt="Five-stage retrieval pipeline with hybrid search, seed evidence, k-hop expansion, and evidence-grounded answer" /><figcaption>Retrieval flow from user query to cross-video hybrid search, seed evidence extraction, graph expansion, reranking, and a timestamped answer.</figcaption></figure>
+      <h2 class="project-section">Cross-video search</h2><p>The same retrieval abstraction extends beyond a single video. Node embeddings are precomputed and cached during ingestion, allowing a query to search across a corpus of processed videos, retrieve evidence from multiple sources, and preserve which video and timestamp each item came from.</p><p>This turns the system from a single-video QA tool into a searchable multimodal video corpus in which evidence from different videos can be brought together through a shared retrieval interface.</p>
+      <h2 class="project-section">Explainable video QA</h2><p>The output is not only an answer. It includes the evidence used to construct that answer: transcript excerpts, visual evidence, OCR, timestamps, node identifiers, and the relevant neighborhood of the graph. The goal is to make retrieval inspectable rather than treating the reasoning context as an opaque bundle of chunks.</p>
+      <h2 class="project-section">Prototype system</h2><p>The system is implemented as an end-to-end application with a FastAPI backend and a React interface. The UI synchronizes the video, transcript, interactive graph, query, and ranked evidence so that the user can move directly between an answer and the supporting video context.</p><p>The implementation also uses precomputed embeddings, caching, parallel visual processing, and a lightweight <code>ffmpeg</code>-based ingestion path to reduce query-time and ingestion overhead.</p>
+      <figure class="project-figure wide"><img src="/images/Video%20Graph%20Research%20Dashboard.png" alt="Video Graph research dashboard with video player, knowledge graph, transcript, query, and evidence panels" /><figcaption>Prototype interface combining the video, graph, transcript, query, and ranked supporting evidence in one workspace.</figcaption></figure>
+      <h2 class="project-section">Evaluation framework</h2><p>At the current stage, the project defines an evaluation framework rather than reporting a complete quantitative benchmark. Retrieval quality can be measured using Recall@5/10, MRR, nDCG@k, timestamp overlap, and evidence redundancy. Answer quality can be evaluated through human-rated correctness and faithfulness, citation precision, and temporal error. Efficiency can be measured through index-build time, p50/p90 query latency, and memory footprint.</p>
+      <h2 class="project-section">Limitations and future directions</h2><p><strong>Discourse grounding.</strong> Discourse relations are currently inferred and could be strengthened with more explicit structural constraints.</p><p><strong>Cross-video linking.</strong> Retrieval already spans multiple videos, but richer explicit links based on shared entities and aligned topics would make the corpus graph more coherent.</p><p><strong>Benchmarking.</strong> The next important step is systematic evaluation on established VideoQA benchmarks together with human evaluation of evidence faithfulness.</p><p><strong>Interactive refinement.</strong> User-driven graph corrections and active-learning loops could make the representation progressively more reliable.</p>
+      <h2 class="project-section">Links</h2><p class="project-links"><a href="https://github.com/MayssaHH/Graphcast" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://drive.google.com/file/d/1jKjik4BT2mnSc-bRyVsq_zeU017thuoe/view?usp=sharing" target="_blank" rel="noopener noreferrer">Demo</a></p>
     </article>
-
-    <footer>
-      <hr class="slender" />
-      <div class="credits">
-        <a href="https://github.com/MayssaHH" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="https://www.linkedin.com/in/mayssa-hajj-hassan-40a363264/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-        <a href="mailto:mayssahajj03@gmail.com">Email</a>
-        <a href="/projects/">Projects</a>
-      </div>
-    </footer>
+    <footer><hr class="slender"/><div class="credits"><a href="https://github.com/MayssaHH" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://www.linkedin.com/in/mayssa-hajj-hassan-40a363264/" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="mailto:mayssahajj03@gmail.com">Email</a><a href="/projects/">Projects</a><a href="/community/">Community</a></div></footer>
   </body>
 </html>
