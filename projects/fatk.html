@@ -12,122 +12,30 @@
     <link rel="stylesheet" href="/css/theme.css" />
     <link rel="canonical" href="https://mayssahh.github.io/projects/fatk.html" />
   </head>
-
   <body>
-    <header>
-      <nav class="group">
-        <a href="/">Mayssa Hajj Hassan</a>
-        <a class="active" href="/projects/">Projects</a>
-      </nav>
-    </header>
-
+    <header><nav class="group"><a href="/">Mayssa Hajj Hassan</a><a class="active" href="/projects/">Projects</a><a href="/community/">Community</a></nav></header>
     <article class="group">
       <h1>FATK</h1>
       <p class="subtitle">Feature-Adaptive Triple Kernel: learning which features matter and how similarity should be measured for each one.</p>
       <p class="project-meta">Final Year Project at the American University of Beirut · Kernel Learning / Interpretable Machine Learning</p>
       <p class="project-contribution"><strong>My contribution:</strong> theoretical construction of the model and design/evaluation of the synthetic-data experiments.</p>
       <p><a href="https://www.instagram.com/p/DZNebMkim4-/?utm_source=ig_web_copy_link&igsi=MzRlODBiNWFlZA==" target="_blank" rel="noopener noreferrer">Recipient of AUB MSFEA’s Dean’s Award for Creative Achievement.</a></p>
-
-      <h2 class="project-section">Motivation</h2>
-      <p>
-        Standard kernels usually compress all feature differences into one global similarity measure. That can be limiting when different dimensions carry different amounts of information—or when different features are better described by different similarity functions.
-      </p>
-      <p>
-        FATK was built around two questions: <em>which features matter?</em> and <em>what kind of similarity should each feature use?</em> Instead of fixing one global kernel in advance, the model learns feature relevance and kernel structure jointly.
-      </p>
-
-      <h2 class="project-section">Core idea</h2>
-      <p>
-        For each feature <em>k</em>, FATK constructs a local kernel as a learned mixture of linear, RBF, and polynomial components. A separate learned weight controls how much that feature contributes to the final kernel. This gives two levels of adaptivity: feature relevance through δ<sub>k</sub>, and feature-specific kernel preference through α<sub>k</sub>, β<sub>k</sub>, and ζ<sub>k</sub>.
-      </p>
-
-      <figure class="project-figure wide">
-        <img src="/images/fatk_method.png" alt="FATK feature-adaptive triple-kernel construction" />
-        <figcaption>FATK decomposes similarity feature by feature, learns a local mixture of linear, RBF, and polynomial kernels, and then combines those feature kernels with learned relevance weights.</figcaption>
-      </figure>
-
-      <h2 class="project-section">Learning the kernel</h2>
-      <p>
-        The kernel parameters are optimized using Centered Kernel Alignment (CKA), encouraging the learned kernel matrix to align with the label structure. Once learned, the kernel can be used by conventional kernel classifiers such as Kernel Ridge Regression and Support Vector Machines.
-      </p>
-      <p>
-        This separation is useful conceptually: FATK learns the geometry of similarity, while a standard kernel classifier performs the final prediction.
-      </p>
-
-      <h2 class="project-section">Experimental questions</h2>
-      <p>
-        The evaluation was designed to test more than predictive accuracy. We asked whether FATK can recover the truly informative features on controlled synthetic data, whether it remains robust as irrelevant dimensions are added, and where the feature-wise additive construction breaks down.
-      </p>
-
-      <h2 class="project-section">Sparse feature recovery</h2>
-      <p>
-        A particularly useful stress test contains only three informative features among thirty-three total dimensions. Because the data-generating process is known, we can directly compare the learned feature weights with the true signal features.
-      </p>
-      <p>
-        ModTriple reached 76.8% KRR accuracy, 79.2% SVM accuracy, and an m<sub>signal</sub> score of 0.985 at SNR 1.5. The feature-relevance profile shows the learned weights concentrating on the informative dimensions while suppressing the noise features.
-      </p>
-
-      <figure class="project-figure wide">
-        <img src="/images/fatk_feature_recovery.png" alt="FATK learned feature relevance on a sparse synthetic task" />
-        <figcaption>Sparse feature recovery: three informative dimensions stand out among thirty irrelevant features, with m<sub>signal</sub> = 0.985.</figcaption>
-      </figure>
-
-      <h2 class="project-section">Noise robustness</h2>
-      <p>
-        We also varied the amount of irrelevant information and the signal-to-noise ratio. The goal was to test whether feature-wise weighting could preserve predictive performance while still concentrating mass on useful features.
-      </p>
-
-      <figure class="project-figure wide">
-        <img src="/images/fatk_noise_robustness.png" alt="FATK noise robustness leaderboard" />
-        <figcaption>Noise-robustness sweep at SNR = 2.0 with eight noise features using KRR. ModTriple leads the compared variants while maintaining strong signal recovery.</figcaption>
-      </figure>
-
-      <h2 class="project-section">Where FATK works — and where it fails</h2>
-      <p>
-        FATK’s feature-wise additive construction is also its main inductive bias. It performs strongly when useful information can be attributed to individual dimensions, but it struggles when prediction depends primarily on interactions between features.
-      </p>
-      <p>
-        On the additive synthetic task, ModTriple achieved 92.1% KRR and 93.9% SVM accuracy. On product and XOR interaction tasks, performance dropped to approximately chance level.
-      </p>
-
-      <figure class="project-figure wide">
-        <img src="/images/fatk_interactions.png" alt="FATK performance on additive, product, and XOR synthetic tasks" />
-        <figcaption>The model is strong on additive structure but fails on product and XOR-style cross-feature interactions, exposing the cost of its interpretable feature-wise decomposition.</figcaption>
-      </figure>
-
-      <h2 class="project-section">Main findings</h2>
-      <p><strong>Feature selection.</strong> FATK learns relevance weights that concentrate on informative dimensions rather than treating all variables equally.</p>
-      <p><strong>Adaptive similarity.</strong> Each feature can learn a different mixture of linear, RBF, and polynomial behavior instead of sharing one global kernel family.</p>
-      <p><strong>Noise robustness.</strong> Feature-wise weighting helps suppress irrelevant dimensions in controlled synthetic settings.</p>
-      <p><strong>A clear inductive bias.</strong> The same additive decomposition that makes feature relevance interpretable limits the model when predictive structure depends on strong cross-feature interactions.</p>
-
-      <h2 class="project-section">Limitations</h2>
-      <p><strong>Interaction modeling.</strong> Product and XOR experiments reveal that the current formulation does not naturally capture strong cross-feature interactions.</p>
-      <p><strong>Computational cost.</strong> FATK learns more parameters than classical global kernels and therefore incurs additional optimization cost.</p>
-      <p><strong>Classification only.</strong> The current study focuses on classification; regression remains an extension rather than an evaluated result.</p>
-
-      <h2 class="project-section">What I would explore next</h2>
-      <p>
-        The part of this project I find most interesting is the tension between interpretability and expressiveness. Decomposing the kernel feature by feature makes learned relevance directly inspectable, but the same decomposition becomes restrictive when useful structure lives in interactions between variables.
-      </p>
-      <p>
-        A natural next step would be to preserve feature-level interpretability while introducing selective pairwise or higher-order interactions, rather than reverting to a completely global kernel. Other directions include sparse interaction learning, cheaper parameterizations, regression, and stability analysis of the learned relevance weights.
-      </p>
-
-      <h2 class="project-section">Links</h2>
-      <p class="project-links">
-        <a href="https://www.instagram.com/p/DZNebMkim4-/?utm_source=ig_web_copy_link&igsi=MzRlODBiNWFlZA==" target="_blank" rel="noopener noreferrer">Dean’s Award announcement</a>
-      </p>
+      <h2 class="project-section">Motivation</h2><p>Standard kernels usually compress all feature differences into one global similarity measure. That can be limiting when different dimensions carry different amounts of information—or when different features are better described by different similarity functions.</p><p>FATK was built around two questions: <em>which features matter?</em> and <em>what kind of similarity should each feature use?</em> Instead of fixing one global kernel in advance, the model learns feature relevance and kernel structure jointly.</p>
+      <h2 class="project-section">Core idea</h2><p>For each feature <em>k</em>, FATK constructs a local kernel as a learned mixture of linear, RBF, and polynomial components. A separate learned weight controls how much that feature contributes to the final kernel. This gives two levels of adaptivity: feature relevance through δ<sub>k</sub>, and feature-specific kernel preference through α<sub>k</sub>, β<sub>k</sub>, and ζ<sub>k</sub>.</p>
+      <figure class="project-figure wide"><img src="/images/fatk_method.png" alt="FATK feature-adaptive triple-kernel construction" /><figcaption>FATK decomposes similarity feature by feature, learns a local mixture of linear, RBF, and polynomial kernels, and then combines those feature kernels with learned relevance weights.</figcaption></figure>
+      <h2 class="project-section">Learning the kernel</h2><p>The kernel parameters are optimized using Centered Kernel Alignment (CKA), encouraging the learned kernel matrix to align with the label structure. Once learned, the kernel can be used by conventional kernel classifiers such as Kernel Ridge Regression and Support Vector Machines.</p><p>This separation is useful conceptually: FATK learns the geometry of similarity, while a standard kernel classifier performs the final prediction.</p>
+      <h2 class="project-section">Experimental questions</h2><p>The evaluation was designed to test more than predictive accuracy. We asked whether FATK can recover the truly informative features on controlled synthetic data, whether it remains robust as irrelevant dimensions are added, and where the feature-wise additive construction breaks down.</p>
+      <h2 class="project-section">Sparse feature recovery</h2><p>A particularly useful stress test contains only three informative features among thirty-three total dimensions. Because the data-generating process is known, we can directly compare the learned feature weights with the true signal features.</p><p>ModTriple reached 76.8% KRR accuracy, 79.2% SVM accuracy, and an m<sub>signal</sub> score of 0.985 at SNR 1.5. The feature-relevance profile shows the learned weights concentrating on the informative dimensions while suppressing the noise features.</p>
+      <figure class="project-figure wide"><img src="/images/fatk_feature_recovery.png" alt="FATK learned feature relevance on a sparse synthetic task" /><figcaption>Sparse feature recovery: three informative dimensions stand out among thirty irrelevant features, with m<sub>signal</sub> = 0.985.</figcaption></figure>
+      <h2 class="project-section">Noise robustness</h2><p>We also varied the amount of irrelevant information and the signal-to-noise ratio. The goal was to test whether feature-wise weighting could preserve predictive performance while still concentrating mass on useful features.</p>
+      <figure class="project-figure wide"><img src="/images/fatk_noise_robustness.png" alt="FATK noise robustness leaderboard" /><figcaption>Noise-robustness sweep at SNR = 2.0 with eight noise features using KRR. ModTriple leads the compared variants while maintaining strong signal recovery.</figcaption></figure>
+      <h2 class="project-section">Where FATK works — and where it fails</h2><p>FATK’s feature-wise additive construction is also its main inductive bias. It performs strongly when useful information can be attributed to individual dimensions, but it struggles when prediction depends primarily on interactions between features.</p><p>On the additive synthetic task, ModTriple achieved 92.1% KRR and 93.9% SVM accuracy. On product and XOR interaction tasks, performance dropped to approximately chance level.</p>
+      <figure class="project-figure wide"><img src="/images/fatk_interactions.png" alt="FATK performance on additive, product, and XOR synthetic tasks" /><figcaption>The model is strong on additive structure but fails on product and XOR-style cross-feature interactions, exposing the cost of its interpretable feature-wise decomposition.</figcaption></figure>
+      <h2 class="project-section">Main findings</h2><p><strong>Feature selection.</strong> FATK learns relevance weights that concentrate on informative dimensions rather than treating all variables equally.</p><p><strong>Adaptive similarity.</strong> Each feature can learn a different mixture of linear, RBF, and polynomial behavior instead of sharing one global kernel family.</p><p><strong>Noise robustness.</strong> Feature-wise weighting helps suppress irrelevant dimensions in controlled synthetic settings.</p><p><strong>A clear inductive bias.</strong> The same additive decomposition that makes feature relevance interpretable limits the model when predictive structure depends on strong cross-feature interactions.</p>
+      <h2 class="project-section">Limitations</h2><p><strong>Interaction modeling.</strong> Product and XOR experiments reveal that the current formulation does not naturally capture strong cross-feature interactions.</p><p><strong>Computational cost.</strong> FATK learns more parameters than classical global kernels and therefore incurs additional optimization cost.</p><p><strong>Classification only.</strong> The current study focuses on classification; regression remains an extension rather than an evaluated result.</p>
+      <h2 class="project-section">What I would explore next</h2><p>The part of this project I find most interesting is the tension between interpretability and expressiveness. Decomposing the kernel feature by feature makes learned relevance directly inspectable, but the same decomposition becomes restrictive when useful structure lives in interactions between variables.</p><p>A natural next step would be to preserve feature-level interpretability while introducing selective pairwise or higher-order interactions, rather than reverting to a completely global kernel. Other directions include sparse interaction learning, cheaper parameterizations, regression, and stability analysis of the learned relevance weights.</p>
+      <h2 class="project-section">Links</h2><p class="project-links"><a href="https://www.instagram.com/p/DZNebMkim4-/?utm_source=ig_web_copy_link&igsi=MzRlODBiNWFlZA==" target="_blank" rel="noopener noreferrer">Dean’s Award announcement</a></p>
     </article>
-
-    <footer>
-      <hr class="slender" />
-      <div class="credits">
-        <a href="https://github.com/MayssaHH" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="https://www.linkedin.com/in/mayssa-hajj-hassan-40a363264/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-        <a href="mailto:mayssahajj03@gmail.com">Email</a>
-        <a href="/projects/">Projects</a>
-      </div>
-    </footer>
+    <footer><hr class="slender"/><div class="credits"><a href="https://github.com/MayssaHH" target="_blank" rel="noopener noreferrer">GitHub</a><a href="https://www.linkedin.com/in/mayssa-hajj-hassan-40a363264/" target="_blank" rel="noopener noreferrer">LinkedIn</a><a href="mailto:mayssahajj03@gmail.com">Email</a><a href="/projects/">Projects</a><a href="/community/">Community</a></div></footer>
   </body>
 </html>
