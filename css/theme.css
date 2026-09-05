@@ -9,7 +9,6 @@
   --border: #DDDCD8;
   --hover: #1E3449;
 
-  /* Override the reference stylesheet's old red/paper variables. */
   --accent: #243B53;
   --paper-line: #DDDCD8;
   --paper-soft: #F7F7F5;
@@ -21,7 +20,6 @@ body {
   color: var(--text) !important;
 }
 
-/* Match the supplied Stone + Navy reference rather than the larger ET Book rendering. */
 body {
   font-family: "Source Serif 4", Georgia, serif !important;
 }
@@ -70,7 +68,6 @@ p {
   text-align: left;
 }
 
-/* Navigation: black name + navy Projects, as in the reference image. */
 header nav.group,
 nav.group {
   font-family: "Inter", Arial, sans-serif !important;
@@ -95,7 +92,11 @@ nav.group a.active:visited {
 nav.group a[href="/projects/"],
 nav.group a[href="/projects/"]:visited,
 nav.group a.active[href="/projects/"],
-nav.group a.active[href="/projects/"]:visited {
+nav.group a.active[href="/projects/"]:visited,
+nav.group a[href="/community/"],
+nav.group a[href="/community/"]:visited,
+nav.group a.active[href="/community/"],
+nav.group a.active[href="/community/"]:visited {
   color: var(--navy) !important;
 }
 
@@ -103,7 +104,6 @@ nav.group a:hover {
   color: var(--hover) !important;
 }
 
-/* Inline editorial links: explicitly beat Tufte's p>a color:inherit rule. */
 a,
 a:visited,
 p > a:link,
@@ -130,7 +130,6 @@ article a:hover {
   color: var(--hover) !important;
 }
 
-/* Research/project listing stays editorial: dark titles, muted metadata, stone dividers. */
 ul.content-listing h2,
 ul.content-listing > li > a,
 ul.content-listing > li > a:visited,
@@ -198,7 +197,6 @@ footer .credits a:visited {
   border-color: var(--border) !important;
 }
 
-/* Homepage portrait: widen only the intro, keep Research & Notes on the original reading column. */
 .home-intro {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 250px;
