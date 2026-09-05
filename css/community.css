@@ -67,25 +67,18 @@ article.community-page {
   text-align: left;
 }
 
-.community-photo--book img {
-  max-height: 300px;
-  width: auto;
-  max-width: 240px !important;
-  margin-left: 0;
-}
-
-.ai-journey-images {
+.reviewer-images {
   display: grid;
-  grid-template-columns: 1fr 0.72fr;
-  gap: 0.65rem;
+  grid-template-columns: 0.78fr 1.22fr;
+  gap: 0.6rem;
   width: 280px;
   align-items: start;
 }
 
-.ai-journey-images img {
-  width: 100%;
+.reviewer-images img {
+  width: 100% !important;
   height: auto;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 @media screen and (max-width: 900px) {
@@ -100,7 +93,7 @@ article.community-page {
 
   .community-photo,
   .community-photo img,
-  .ai-journey-images {
+  .reviewer-images {
     width: 230px !important;
   }
 }
@@ -118,13 +111,8 @@ article.community-page {
 
   .community-photo,
   .community-photo img,
-  .ai-journey-images {
+  .reviewer-images {
     width: min(100%, 320px) !important;
     max-width: 320px !important;
-  }
-
-  .community-photo--book img {
-    width: auto !important;
-    max-width: 220px !important;
   }
 }
