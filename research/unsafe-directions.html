@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Do Language Models Share Unsafe Directions in Activation Space? — Mayssa Hajj Hassan</title>
+    <meta name="description" content="Research study on whether safety-related activation directions can be aligned across language models into a shared representational space." />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Moe-Zbeeb/Moe-Zbeeb.github.io@main/css/tufte.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Moe-Zbeeb/Moe-Zbeeb.github.io@main/css/site.css" />
+    <link rel="stylesheet" href="/css/project.css" />
+    <link rel="stylesheet" href="/css/theme.css" />
+    <link rel="canonical" href="https://mayssahh.github.io/research/unsafe-directions.html" />
+  </head>
+
+  <body>
+    <header>
+      <nav class="group">
+        <a href="/">Mayssa Hajj Hassan</a>
+        <a href="/projects/">Projects</a>
+        <a href="/community/">Community</a>
+      </nav>
+    </header>
+
+    <article class="group">
+      <h1>Do Language Models Share Unsafe Directions in Activation Space?</h1>
+      <p class="subtitle">Investigating whether safety-related representations across language models can be aligned into a shared activation space and summarized by a common unsafe direction.</p>
+      <p class="project-meta">Research study · Mechanistic Interpretability / AI Safety · 2026</p>
+
+      <p>
+        This work asks whether large language models share a safety-related direction once their hidden-state representations are mapped into a common reference space. For each model, I first extract a native unsafe direction as the difference between mean unsafe and safe activations at a late layer. I then learn linear alignment matrices on benign instruction data, map the model-specific directions into a shared space, and use SVD to extract a dominant shared component that I refer to as the universal safety vector.
+      </p>
+
+      <figure class="project-figure">
+        <img src="/images/unsafe_fig1_direction.webp" alt="Canonical unsafe direction in activation space" />
+        <figcaption>A model-specific unsafe direction is defined as the difference between the mean unsafe and safe activations at a given layer.</figcaption>
+      </figure>
+
+      <h2 class="project-section">1. Native safety directions</h2>
+      <p>
+        I use 600 prompts from the SalKhan12/prompt-safety-dataset: 300 harmful prompts balanced across categories and 300 safe prompts. The study includes smaller, weakly aligned Pythia models and larger instruction-tuned models including LLaMA-2-13B-Chat, LLaMA-3-8B-Instruct, Mistral-7B-Instruct, and Qwen2.5-7B-Instruct.
+      </p>
+      <p>
+        For each model, I extract hidden states from a late transformer layer, average over the final five tokens, compute separate mean activations for safe and unsafe prompts, and define the native unsafe direction as
+      </p>
+      <p><strong>u<sub>m</sub> = μ<sub>unsafe</sub> − μ<sub>safe</sub>.</strong></p>
+      <p>
+        Smaller models show substantially noisier overlap between safe and unsafe activations, while larger aligned models generally display clearer separation.
+      </p>
+
+      <h2 class="project-section">2. Learning a common activation space</h2>
+      <p>
+        Different models do not share the same hidden-state coordinates or dimensionality, so their native directions cannot be compared directly. I therefore choose a reference model for each group and learn an Alignment Matrix that maps activations from each source model into the reference model's activation space.
+      </p>
+      <p>
+        For the Pythia family, Pythia-1B is used as the reference. For the larger models, LLaMA-3-8B-Instruct is used as the reference. The alignment matrices are learned from 3,000 benign input-only Alpaca instructions by minimizing hidden-state reconstruction error with a closed-form ridge-regression solution.
+      </p>
+      <p>
+        Importantly, safety-labeled data is not used to learn these alignment matrices. Safety labels are introduced only later when extracting and evaluating safety directions.
+      </p>
+
+      <h2 class="project-section">3. Extracting a universal safety vector</h2>
+      <p>
+        After mapping each model's native unsafe direction into the corresponding reference space, I stack the aligned directions and apply SVD. The dominant component provides a single shared axis for each model group, which I refer to as the universal safety vector.
+      </p>
+      <p>
+        The mapped directions show consistently positive cosine similarity with the shared axis, with average alignment to the universal vector of roughly 0.72. This suggests that, after alignment, much of the safety-related variation across models can be summarized by a common low-dimensional direction.
+      </p>
+
+      <h2 class="project-section">4. Behavioral validation</h2>
+      <p>
+        Geometric agreement alone is not enough; the shared direction must also separate safe and unsafe activations on held-out prompts. I therefore compare AUROC using each model's native direction against the mapped universal direction.
+      </p>
+
+      <div class="project-table">
+        <table>
+          <thead>
+            <tr><th>Model</th><th>AUROC (native)</th><th>AUROC (universal / mapped)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Pythia-160M</td><td>0.7109</td><td>0.6984</td></tr>
+            <tr><td>Pythia-410M</td><td>0.6600</td><td>0.7376</td></tr>
+            <tr><td>Pythia-1B</td><td>0.7971</td><td>0.7714</td></tr>
+            <tr><td>LLaMA-3-8B-Instruct</td><td>0.8607</td><td>0.7969</td></tr>
+            <tr><td>Mistral-7B-Instruct</td><td>0.6758</td><td>0.7911</td></tr>
+            <tr><td>Qwen2.5-7B-Instruct</td><td>0.8655</td><td>0.8190</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        The universal direction performs comparably to native model-specific directions on average. The clearest gains appear when a model's native direction is relatively noisy: Pythia-410M improves from 0.6600 to 0.7376 AUROC, and Mistral-7B improves from 0.6758 to 0.7911. This suggests that cross-model aggregation can recover a cleaner safety signal when a single model's native representation is less stable.
+      </p>
+
+      <h2 class="project-section">5. A key failure case: LLaMA-2</h2>
+      <p>
+        LLaMA-2-13B-Chat is a strong counterexample. Despite good geometric alignment with the shared direction, its universal-direction AUROC is only 0.2347. Repeating the experiment with LLaMA-2 as the reference model did not resolve the failure.
+      </p>
+      <p>
+        This is an important result: strong cosine alignment does not guarantee that a direction is behaviorally discriminative. Differences in alignment strategy appear to affect how safety is encoded, limiting clean transfer across alignment regimes in the current setup.
+      </p>
+
+      <h2 class="project-section">6. The direction transfers better than the threshold</h2>
+      <p>
+        The experiments do not reveal a single projection threshold that classifies safe versus unsafe behavior consistently across models. The universal direction remains useful for relative separation, but the raw score scale varies by model.
+      </p>
+      <p>
+        The main conclusion is therefore that the axis appears more transferable than its calibration. In the current setup, the shared direction is better suited to comparative analysis, routing, representational study, or controlled intervention than to absolute classification with one global threshold.
+      </p>
+
+      <h2 class="project-section">7. Generation-time behavior</h2>
+      <p>
+        I also track projection onto the universal axis during generation. For LLaMA-3-8B-Instruct, the score tends to rise over the course of an unsafe generation while remaining lower and more stable for a safe reasoning prompt. This suggests that the shared direction captures safety-relevant dynamics during decoding, not only static prompt-level differences.
+      </p>
+
+      <h2 class="project-section">8. Potential applications</h2>
+      <p><strong>Relative model comparison and routing.</strong> Models can be mapped into a shared reference space and ranked by their relative projection on the same safety axis for a given query.</p>
+      <p><strong>Generation-time monitoring.</strong> The projection score can be tracked continuously during decoding as a possible signal for adaptive control.</p>
+      <p><strong>Cross-model intervention.</strong> Preliminary experiments explored injecting the universal vector back into activation space. These experiments are not mature enough for firm conclusions, but they motivate a standardized intervention scheme that does not require extracting a new direction independently for every model.</p>
+
+      <h2 class="project-section">9. Limitations</h2>
+      <p><strong>No universal threshold.</strong> Projection-score calibration remains model specific.</p>
+      <p><strong>Limited model diversity.</strong> The SVD result needs validation on a substantially larger and more diverse collection of model families.</p>
+      <p><strong>Alignment-regime sensitivity.</strong> The LLaMA-2 failure suggests the current approach does not yet transfer reliably across distinct generations of alignment methods.</p>
+      <p><strong>Simple alignment model.</strong> The current Alignment Matrix is intentionally linear and learned by closed-form ridge regression; stronger alignment methods may improve transfer.</p>
+      <p><strong>Intervention remains preliminary.</strong> The work demonstrates representational and behavioral evidence more strongly than intervention efficacy.</p>
+
+      <h2 class="project-section">Conclusion</h2>
+      <p>
+        The study provides evidence that safety-related directions from different language models can be brought into a common activation space and summarized by a dominant shared axis. That axis is behaviorally meaningful on held-out prompts and can outperform noisy native directions in some models. At the same time, the LLaMA-2 counterexample and the lack of a universal threshold show that shared geometry should not be confused with universal calibration. The strongest current claim is therefore a shared representational direction—not a universal classifier.
+      </p>
+    </article>
+
+    <footer>
+      <hr class="slender" />
+      <div class="credits">
+        <a href="/">Home</a>
+        <a href="/projects/">Projects</a>
+        <a href="/community/">Community</a>
+        <a href="https://github.com/MayssaHH" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://www.linkedin.com/in/mayssa-hajj-hassan-40a363264/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href="mailto:mayssahajj03@gmail.com">Email</a>
+      </div>
+    </footer>
+  </body>
+</html>
