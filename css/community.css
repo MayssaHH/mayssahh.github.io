@@ -82,19 +82,24 @@ article.community-page {
   max-width: 280px !important;
 }
 
+/* Keep the reviewer proof directly under the full text column, at the same width. */
 .reviewer-acknowledgment {
-  grid-column: 1 / -1;
+  grid-column: 1;
+  grid-row: 2;
   width: 100% !important;
-  max-width: none !important;
-  margin: 2.25rem 0 0 !important;
+  max-width: 100% !important;
+  margin: 2rem 0 0 !important;
+  padding: 0 !important;
   float: none !important;
+  justify-self: stretch;
 }
 
 .reviewer-acknowledgment img {
   display: block;
-  width: min(100%, 900px) !important;
+  width: 100% !important;
   height: auto;
-  max-width: none !important;
+  max-width: 100% !important;
+  margin: 0 !important;
 }
 
 @media screen and (max-width: 900px) {
@@ -145,6 +150,7 @@ article.community-page {
 
   .reviewer-acknowledgment {
     grid-column: 1;
+    grid-row: auto;
     margin-top: 1.25rem !important;
   }
 
