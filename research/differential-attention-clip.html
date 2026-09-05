@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns#" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Differential Attention Transplant for Pretrained CLIP — Mayssa Hajj Hassan</title>
+    <meta name="description" content="A research proposal on transplanting differential attention into a pretrained CLIP vision encoder while preserving teacher behavior and controlling representation drift." />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Moe-Zbeeb/Moe-Zbeeb.github.io@main/css/tufte.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Moe-Zbeeb/Moe-Zbeeb.github.io@main/css/site.css" />
+    <link rel="stylesheet" href="/css/project.css" />
+    <link rel="stylesheet" href="/css/theme.css" />
+    <link rel="canonical" href="https://mayssahh.github.io/research/differential-attention-clip.html" />
+  </head>
+
+  <body>
+    <header>
+      <nav class="group">
+        <a href="/">Mayssa Hajj Hassan</a>
+        <a href="/projects/">Projects</a>
+        <a href="/community/">Community</a>
+      </nav>
+    </header>
+
+    <article class="group">
+      <h1>Differential Attention Transplant for Pretrained CLIP</h1>
+      <p class="subtitle">Can differential attention be surgically inserted into an already pretrained CLIP vision encoder without destroying the representation geometry that pretraining created?</p>
+      <p class="project-meta">Research proposal · Theoretical work · 2026</p>
+
+      <p>
+        This proposal studies differential attention as a <em>transplant problem</em>, not as a full retraining problem. The goal is to modify selected self-attention blocks in a pretrained CLIP image encoder while preserving the original model as closely as possible at initialization, then adapt only a small new parameter subset with a low-budget calibration stage.
+      </p>
+      <p>
+        The motivation is practical: standard attention may not be ideal when we want stronger distractor suppression, nuisance robustness, or more selective token mixing, but CLIP already contains a valuable image-text embedding geometry that we do not want to overwrite. The central question is therefore how much architectural change can be introduced while keeping the pretrained teacher behavior under explicit control.
+      </p>
+
+      <figure class="project-figure wide">
+        <img src="/images/Teacher-preserving%20transplant%20into%20CLIP.png" alt="Teacher-preserving differential-attention transplant into a pretrained CLIP vision encoder" />
+        <figcaption>The proposal treats conversion as a teacher-preserving transplant: copy the original attention path into Branch 1, introduce a weak differential residual branch, and calibrate only a small subset of parameters.</figcaption>
+      </figure>
+
+      <h2 class="project-section">1. From standard attention to differential attention</h2>
+      <p>
+        For one attention head, the pretrained teacher uses the standard form
+      </p>
+      <p><strong>Y<sub>t</sub> = A<sub>t</sub>V.</strong></p>
+      <p>
+        The converted student introduces two attention branches and computes
+      </p>
+      <p><strong>Y<sub>s</sub> = (A<sub>1</sub> − λA<sub>2</sub>)V,</strong></p>
+      <p>
+        or, in the centered version proposed here,
+      </p>
+      <p><strong>Y<sub>s</sub><sup>ctr</sup> = [A<sub>1</sub> − λ(A<sub>2</sub> − U<sub>T</sub>)]V.</strong></p>
+      <p>
+        Branch 1 is the teacher-preserving route. Branch 2 is intended to learn a complementary subtractive correction. The coefficient λ controls how strongly that second branch can alter the original token-mixing behavior.
+      </p>
+
+      <h2 class="project-section">2. Why λ is a safety parameter</h2>
+      <p>
+        Both A<sub>1</sub> and A<sub>2</sub> are row-wise softmax matrices, so each row sums to one. In the uncentered differential form,
+      </p>
+      <p><strong>(A<sub>1</sub> − λA<sub>2</sub>)1 = (1 − λ)1.</strong></p>
+      <p>
+        This means subtraction changes not only <em>where</em> attention is placed, but also the total mixing mass of the operator. The proposal therefore bounds the subtraction coefficient by construction:
+      </p>
+      <p><strong>0 ≤ λ<sub>ℓ,h</sub> ≤ λ<sub>max</sub> &lt; 1.</strong></p>
+      <p>
+        A sigmoid parameterization lets optimization operate over unconstrained variables while guaranteeing that the effective subtraction strength remains inside the admissible interval.
+      </p>
+
+      <h2 class="project-section">3. Why centering matters</h2>
+      <p>
+        A subtle issue appears when Branch 2 is initialized with small logits. Softmax does not map near-zero logits to a near-zero attention map; it maps them to an approximately uniform distribution. So a branch that is intended to be almost inactive can still subtract a non-trivial uniform component from every token position.
+      </p>
+      <p>
+        Centering removes that artifact by subtracting only the deviation of Branch 2 from the uniform baseline. If A<sub>2</sub> ≈ U<sub>T</sub>, then A<sub>2</sub> − U<sub>T</sub> ≈ 0, and the correction is correspondingly small.
+      </p>
+
+      <figure class="project-figure wide">
+        <img src="/images/uncentered%20vs%20centered%20.png" alt="Comparison of uncentered and centered differential attention at initialization" />
+        <figcaption>Why centering is initialization-friendly: an apparently weak Branch 2 becomes nearly uniform after softmax; subtracting the uniform baseline makes that weak branch behave like a weak correction rather than an unintended global subtraction.</figcaption>
+      </figure>
+
+      <h2 class="project-section">4. Teacher-preserving initialization</h2>
+      <p>
+        The transplant is deliberately asymmetric. Branch 1 copies the original teacher projections exactly, so its initial attention map matches the pretrained teacher. Branch 2 should not duplicate that same dominant structure; it is initialized as a small teacher-informed residual pathway.
+      </p>
+      <p>
+        For each head, the teacher query and key projection matrices are decomposed with SVD. The dominant singular directions remain represented in the full teacher copy, while the low-energy spectral tail is used as a structured template for the new Branch-2 query and key projections.
+      </p>
+      <p>
+        Those residual matrices are normalized and rescaled to a small fraction of the corresponding teacher norm. The intention is to give Branch 2 useful structure without allowing it to compete with the teacher route at step 0.
+      </p>
+
+      <figure class="project-figure wide">
+        <img src="/images/teacher-informed%20initialization%20of%20branch%202.png" alt="SVD-based teacher-informed initialization of the second differential-attention branch" />
+        <figcaption>Branch 1 preserves the full teacher attention path; Branch 2 is initialized only from a small, norm-controlled low-energy residual of the teacher query/key geometry.</figcaption>
+      </figure>
+
+      <h2 class="project-section">5. Step-0 drift</h2>
+      <p>
+        The proposal makes the initial teacher-student mismatch explicit. For one head,
+      </p>
+      <p><strong>Y<sub>s</sub> − Y<sub>t</sub> = (A<sub>1</sub> − A<sub>t</sub>)V − λA<sub>2</sub>V.</strong></p>
+      <p>
+        Under the exact-copy initialization of Branch 1, A<sub>1</sub> = A<sub>t</sub>, so the first term vanishes and
+      </p>
+      <p><strong>Y<sub>s</sub> − Y<sub>t</sub> = −λA<sub>2</sub>V.</strong></p>
+      <p>
+        This is the core step-0 result: once the teacher path is copied exactly, initial deviation is driven by the subtractive branch, making λ the most direct control over transplant risk.
+      </p>
+
+      <h2 class="project-section">6. How local drift propagates through CLIP</h2>
+      <p>
+        A local mismatch does not remain local. Once the modified hidden state enters later residual blocks, the perturbation can propagate and potentially amplify. With a local Lipschitz assumption and a bounded teacher-student block mismatch, the proposal derives the recurrence
+      </p>
+      <p><strong>||δ<sub>ℓ+1</sub>||<sub>F</sub> ≤ (1 + L<sub>ℓ</sub>)||δ<sub>ℓ</sub>||<sub>F</sub> + ε<sub>ℓ</sub>.</strong></p>
+      <p>
+        This gives a concrete reason to begin with late-layer-only transplantation: a mismatch introduced late in the vision stack has fewer subsequent layers through which it can accumulate.
+      </p>
+
+      <h2 class="project-section">7. From representation drift to CLIP logit drift</h2>
+      <p>
+        Because CLIP uses normalized image and text embeddings, teacher-student cosine preservation directly controls the change in image-text similarity scores. The proposal derives
+      </p>
+      <p><strong>|ΔS<sub>ij</sub>| ≤ s √(2 − 2〈ũ<sub>i</sub>, u<sub>i</sub>〉).</strong></p>
+      <p>
+        The practical implication is important: feature matching is not merely an auxiliary representation loss. Keeping teacher and student image embeddings close in cosine similarity directly limits worst-case CLIP score drift.
+      </p>
+
+      <h2 class="project-section">8. A data-informed initialization for λ</h2>
+      <p>
+        Instead of choosing every headwise subtraction strength arbitrarily, the proposal also considers a closed-form prefit on a small calibration set. Treating the Branch-2 head contributions as fixed regressors leads to a ridge-regression problem,
+      </p>
+      <p><strong>λ* = (B<sup>T</sup>B + εI)<sup>−1</sup>B<sup>T</sup>(u − y<sub>t</sub>),</strong></p>
+      <p>
+        after which each coefficient is projected back into the safe interval [0, λ<sub>max</sub>]. This provides a teacher-informed step-0 initialization before gradient-based calibration begins.
+      </p>
+
+      <h2 class="project-section">9. Low-budget calibration</h2>
+      <p>
+        The intended operating regime is deliberately small: keep most pretrained CLIP weights frozen and train primarily the new Branch-2 query/key parameters and the bounded subtraction coefficients, with optional late-layer adaptation only if necessary.
+      </p>
+      <p>The calibration objective combines several terms, each targeting a different failure mode:</p>
+      <p><strong>Teacher logit distillation</strong> preserves the teacher's bidirectional image-text retrieval geometry.</p>
+      <p><strong>Feature matching</strong> limits image-embedding drift.</p>
+      <p><strong>Student CLIP loss</strong> keeps the student responsive to paired image-text supervision.</p>
+      <p><strong>λ regularization</strong> discourages unnecessary subtraction.</p>
+      <p><strong>Nuisance consistency</strong> encourages robustness under occlusion, crop shift, clutter, background changes, or mild corruption.</p>
+      <p><strong>Branch diversity</strong> discourages Branch 2 from simply collapsing into Branch 1.</p>
+
+      <figure class="project-figure wide">
+        <img src="/images/drift%20control%20and%20low%20buget%20calibration.png" alt="Step-0 drift control, propagation through the transformer stack, and low-budget calibration objective" />
+        <figcaption>The proposed calibration strategy keeps the initial intervention small, tracks how mismatch can propagate through depth, and then adapts the differential branch with explicit teacher-preserving objectives.</figcaption>
+      </figure>
+
+      <h2 class="project-section">10. Experimental plan</h2>
+      <p>
+        This is currently a theoretical proposal and implementation blueprint, not a completed benchmark result. The proposed calibration set mixes clean image-text pairs, nuisance-augmented pairs, and hard negatives. Clean pairs expose regressions, nuisance-augmented pairs create conditions where suppressive attention may help, and hard negatives prevent robustness from being achieved by simply becoming less discriminative.
+      </p>
+      <p>
+        The main acceptance criteria are intentionally strict: minimal regression immediately after conversion, high teacher-student embedding similarity, low similarity-logit drift, recovery of baseline zero-shot behavior after calibration, and improvement on at least one robustness or retrieval metric without allowing Branch 2 to dominate the teacher path.
+      </p>
+
+      <h2 class="project-section">11. Ablations I would want before claiming success</h2>
+      <p>
+        A convincing experiment should separate the value of the transplant from the value of generic parameter-efficient tuning. Important comparisons include λ-only training, a generic low-rank adapter baseline, late-layer-only versus broader conversion, random or zero Branch-2 initialization, removal of nuisance consistency, and removal of the branch-diversity term.
+      </p>
+      <p>
+        These controls are essential because the central claim is not simply that a modified CLIP can be fine-tuned. The more specific claim is that differential attention can be introduced as a controlled structural intervention while preserving pretrained geometry and using only a modest adaptation budget.
+      </p>
+
+      <h2 class="project-section">Current status</h2>
+      <p>
+        The current work covers the theoretical construction, step-0 safety analysis, transplant initialization, calibration objective, efficiency considerations, and experimental design. The next step is empirical validation: implementing the transplant in pretrained CLIP checkpoints and testing whether the predicted preservation/robustness tradeoff appears in practice.
+      </p>
+    </article>
+
+    <footer>
+      <hr class="slender" />
+      <div class="credits">
+        <a href="/">Home</a>
+        <a href="/projects/">Projects</a>
+        <a href="/community/">Community</a>
+        <a href="https://github.com/MayssaHH" target="_blank" rel="noopener noreferrer">GitHub</a>
+        <a href="https://www.linkedin.com/in/mayssa-hajj-hassan-40a363264/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        <a href="mailto:mayssahajj03@gmail.com">Email</a>
+      </div>
+    </footer>
+  </body>
+</html>
