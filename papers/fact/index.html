@@ -4,10 +4,31 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
-  <title>FACT — Paper</title>
-  <meta http-equiv="refresh" content="0; url=https://arxiv.org/abs/1706.03762">
+  <title>Paper link</title>
 </head>
 <body>
-  <p>Opening the paper. <a href="https://arxiv.org/abs/1706.03762">Continue to the arXiv test paper</a> if you are not redirected automatically.</p>
+  <p id="status" role="status">Opening the current paper…</p>
+  <p><a id="fallback" href="./destination.json">View the current destination</a></p>
+  <noscript>JavaScript is needed for automatic redirection. The link above shows the current paper URL.</noscript>
+  <script>
+    (async function () {
+      const status = document.getElementById("status");
+      const fallback = document.getElementById("fallback");
+      try {
+        const response = await fetch("./destination.json?t=" + Date.now(), { cache: "no-store" });
+        if (!response.ok) throw new Error("Destination unavailable");
+        const destination = await response.json();
+        const url = new URL(destination.url);
+        if (url.protocol !== "https:" || !["arxiv.org", "openreview.net"].includes(url.hostname)) {
+          throw new Error("Unsupported destination");
+        }
+        fallback.href = url.href;
+        fallback.textContent = destination.label || "Open the paper";
+        window.location.replace(url.href);
+      } catch (error) {
+        status.textContent = "The paper link could not be loaded. Please refresh or view the current destination below.";
+      }
+    }());
+  </script>
 </body>
 </html>
